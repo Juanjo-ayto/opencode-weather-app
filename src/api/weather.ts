@@ -1,27 +1,7 @@
-import type { Ciudad, Unidad } from "./types";
-
-interface ResultadoGeocoding {
-  id: number;
-  name: string;
-  latitude: number;
-  longitude: number;
-  country?: string;
-  admin1?: string;
-}
-
-interface RespuestaGeocoding {
-  results?: ResultadoGeocoding[];
-}
-
-export interface ClimaActual {
-  hora: string;
-  temperatura: number;
-  sensacion: number;
-  humedad: number;
-  viento: number;
-  codigoClima: number;
-  unidadTemperatura: string;
-}
+import type { Ciudad } from "../types/City";
+import type { ClimaActual, DiaPronostico, Pronostico, Unidad } from "../types/Weather";
+import { URL_FORECAST } from "../utils/constants";
+import { pedirJson } from "./client";
 
 interface RespuestaClima {
   current?: {
@@ -35,20 +15,6 @@ interface RespuestaClima {
   current_units?: {
     temperature_2m?: string;
   };
-}
-
-export interface DiaPronostico {
-  fecha: string;
-  codigoClima: number;
-  tempMax: number;
-  tempMin: number;
-  probLluvia: number;
-  vientoMax: number;
-}
-
-export interface Pronostico {
-  dias: DiaPronostico[];
-  unidadTemperatura: string;
 }
 
 interface RespuestaPronostico {
@@ -65,34 +31,6 @@ interface RespuestaPronostico {
   };
 }
 
-async function pedirJson(url: string): Promise<unknown> {
-  let respuesta: Response;
-  try {
-    respuesta = await fetch(url);
-  } catch (e) {
-    throw new Error(`sin conexión (${e instanceof Error ? e.message : String(e)})`);
-  }
-  if (!respuesta.ok) {
-    throw new Error(`la API devolvió HTTP ${respuesta.status}`);
-  }
-  return respuesta.json();
-}
-
-export async function buscarCiudades(nombre: string): Promise<Ciudad[]> {
-  const url =
-    `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(nombre)}` +
-    `&count=5&language=es&format=json`;
-  const datos = (await pedirJson(url)) as RespuestaGeocoding;
-  if (!datos.results) return [];
-  return datos.results.map((r) => ({
-    nombre: r.name,
-    lat: r.latitude,
-    lon: r.longitude,
-    pais: r.country,
-    region: r.admin1,
-  }));
-}
-
 export async function obtenerClima(ciudad: Ciudad, unidad: Unidad): Promise<ClimaActual> {
   const params = new URLSearchParams({
     latitude: String(ciudad.lat),
@@ -101,7 +39,7 @@ export async function obtenerClima(ciudad: Ciudad, unidad: Unidad): Promise<Clim
     timezone: "auto",
   });
   if (unidad === "f") params.set("temperature_unit", "fahrenheit");
-  const url = `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
+  const url = `${URL_FORECAST}?${params.toString()}`;
   const datos = (await pedirJson(url)) as RespuestaClima;
   const actual = datos.current;
   if (
@@ -114,7 +52,10 @@ export async function obtenerClima(ciudad: Ciudad, unidad: Unidad): Promise<Clim
   return {
     hora: (actual.time ?? "").replace("T", " "),
     temperatura: actual.temperature_2m,
-    sensacion: typeof actual.apparent_temperature === "number" ? actual.apparent_temperature : actual.temperature_2m,
+    sensacion:
+      typeof actual.apparent_temperature === "number"
+        ? actual.apparent_temperature
+        : actual.temperature_2m,
     humedad: typeof actual.relative_humidity_2m === "number" ? actual.relative_humidity_2m : 0,
     viento: typeof actual.wind_speed_10m === "number" ? actual.wind_speed_10m : 0,
     codigoClima: actual.weather_code,
@@ -132,7 +73,7 @@ export async function obtenerPronostico(ciudad: Ciudad, unidad: Unidad): Promise
     timezone: "auto",
   });
   if (unidad === "f") params.set("temperature_unit", "fahrenheit");
-  const url = `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
+  const url = `${URL_FORECAST}?${params.toString()}`;
   const datos = (await pedirJson(url)) as RespuestaPronostico;
   const daily = datos.daily;
   const fechas = daily?.time;

@@ -1,10 +1,9 @@
-import type { Unidad } from "./types";
-import { amarillo, cian, dim, negrita } from "./color";
-
-const ANCHO = 40;
+import type { Unidad } from "../types/Weather";
+import { amarillo, cian, dim, negrita } from "../utils/colors";
+import { ANCHO_MENU } from "../utils/constants";
 
 export function pintarMenu(unidad: Unidad, totalCiudades: number): void {
-  const linea = cian("═".repeat(ANCHO));
+  const linea = cian("═".repeat(ANCHO_MENU));
   const ajustes = unidad === "c" ? "°C" : "°F";
   console.log(linea);
   console.log(negrita(amarillo("         WEATHER CLI")));
@@ -19,16 +18,4 @@ export function pintarMenu(unidad: Unidad, totalCiudades: number): void {
   console.log(`  ${cian(negrita("8"))}. Ajustes ${dim(`(${ajustes})`)}`);
   console.log(`  ${cian(negrita("9"))}. Salir`);
   console.log(linea);
-}
-
-export async function leerOpcion(): Promise<string | null> {
-  const respuesta = prompt(`${negrita("  Selecciona una opción")}: `);
-  if (respuesta === null) return null;
-  return respuesta.trim();
-}
-
-export async function leerTexto(mensaje: string): Promise<string | null> {
-  const respuesta = prompt(mensaje);
-  if (respuesta === null) return null;
-  return respuesta.trim();
 }

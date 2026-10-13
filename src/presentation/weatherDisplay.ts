@@ -1,51 +1,7 @@
-import type { ClimaActual, Pronostico } from "./api";
-import type { Ciudad } from "./types";
-import { azul, cian, colorClima, colorTemperatura, dim, gris, negrita } from "./color";
-
-const CODIGOS_WMO: Record<number, string> = {
-  0: "Despejado",
-  1: "Principalmente despejado",
-  2: "Parcialmente nublado",
-  3: "Nublado",
-  45: "Niebla",
-  48: "Niebla con escarcha",
-  51: "Llovizna ligera",
-  53: "Llovizna moderada",
-  55: "Llovizna intensa",
-  56: "Llovizna helada ligera",
-  57: "Llovizna helada intensa",
-  61: "Lluvia ligera",
-  63: "Lluvia moderada",
-  65: "Lluvia intensa",
-  66: "Lluvia helada ligera",
-  67: "Lluvia helada intensa",
-  71: "Nieve ligera",
-  73: "Nieve moderada",
-  75: "Nieve intensa",
-  77: "Granos de nieve",
-  80: "Chubascos ligeros",
-  81: "Chubascos moderados",
-  82: "Chubascos intensos",
-  85: "Chubascos de nieve ligeros",
-  86: "Chubascos de nieve intensos",
-  95: "Tormenta",
-  96: "Tormenta con granizo ligera",
-  99: "Tormenta con granizo intensa",
-};
-
-export function descripcionClima(codigo: number): string {
-  return CODIGOS_WMO[codigo] ?? `Clima desconocido (código ${codigo})`;
-}
-
-export function etiquetaCiudad(ciudad: Ciudad): string {
-  return [ciudad.nombre, ciudad.region, ciudad.pais]
-    .filter((parte): parte is string => typeof parte === "string" && parte.length > 0)
-    .join(", ");
-}
-
-function num(valor: number): string {
-  return valor.toLocaleString("es-ES", { maximumFractionDigits: 1 });
-}
+import type { ClimaActual, Pronostico } from "../types/Weather";
+import type { Ciudad } from "../types/City";
+import { azul, cian, colorClima, colorTemperatura, dim, gris, negrita } from "../utils/colors";
+import { descripcionClima, etiquetaCiudad, fechaCorta, num, truncar } from "../utils/format";
 
 function fila(etiqueta: string, valor: string): string {
   return `  ${dim(etiqueta.padEnd(14))}${valor}`;
@@ -78,24 +34,6 @@ export function pintarClima(ciudad: Ciudad, clima: ClimaActual): void {
   console.log(fila("Humedad", cian(`${num(clima.humedad)} %`)));
   console.log(fila("Viento", azul(`${num(clima.viento)} km/h`)));
   console.log(fila("Hora local", gris(clima.hora)));
-}
-
-function fechaCorta(fecha: string): string {
-  const f = new Date(`${fecha}T00:00:00Z`);
-  if (Number.isNaN(f.getTime())) return fecha;
-  const dia = f
-    .toLocaleDateString("es-ES", { weekday: "short", timeZone: "UTC" })
-    .replace(".", "");
-  const resto = f.toLocaleDateString("es-ES", {
-    day: "2-digit",
-    month: "2-digit",
-    timeZone: "UTC",
-  });
-  return `${dia} ${resto}`;
-}
-
-function truncar(texto: string, max: number): string {
-  return texto.length > max ? `${texto.slice(0, max - 1)}…` : texto;
 }
 
 export function pintarPronostico(ciudad: Ciudad, pronostico: Pronostico): void {

@@ -1,9 +1,10 @@
 import { homedir } from "node:os";
-import type { Ciudad, Config, Unidad } from "./types";
+import type { Ciudad } from "../types/City";
+import type { Config } from "../types/Config";
+import type { Unidad } from "../types/Weather";
+import { CONFIG_VACIA } from "../utils/constants";
 
 export const RUTA_CONFIG = `${homedir()}/.weather-cli.json`;
-
-const CONFIG_VACIA: Config = { ciudadDefault: null, ciudades: [], unidad: "c" };
 
 function esCiudad(valor: unknown): valor is Ciudad {
   if (typeof valor !== "object" || valor === null) return false;
@@ -11,7 +12,7 @@ function esCiudad(valor: unknown): valor is Ciudad {
   return typeof c.nombre === "string" && typeof c.lat === "number" && typeof c.lon === "number";
 }
 
-export async function cargarConfig(): Promise<Config> {
+export async function leerConfig(): Promise<Config> {
   try {
     const texto = await Bun.file(RUTA_CONFIG).text();
     const datos = JSON.parse(texto) as Record<string, unknown>;
@@ -24,6 +25,6 @@ export async function cargarConfig(): Promise<Config> {
   }
 }
 
-export async function guardarConfig(config: Config): Promise<void> {
+export async function escribirConfig(config: Config): Promise<void> {
   await Bun.write(RUTA_CONFIG, `${JSON.stringify(config, null, 2)}\n`);
 }
