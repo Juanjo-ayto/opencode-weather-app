@@ -37,6 +37,37 @@ interface RespuestaClima {
   };
 }
 
+<<<<<<< HEAD
+=======
+export interface DiaPronostico {
+  fecha: string;
+  codigoClima: number;
+  tempMax: number;
+  tempMin: number;
+  probLluvia: number;
+  vientoMax: number;
+}
+
+export interface Pronostico {
+  dias: DiaPronostico[];
+  unidadTemperatura: string;
+}
+
+interface RespuestaPronostico {
+  daily?: {
+    time?: string[];
+    weather_code?: number[];
+    temperature_2m_max?: number[];
+    temperature_2m_min?: number[];
+    precipitation_probability_max?: (number | null)[];
+    wind_speed_10m_max?: number[];
+  };
+  daily_units?: {
+    temperature_2m_max?: string;
+  };
+}
+
+>>>>>>> 02-forecast
 async function pedirJson(url: string): Promise<unknown> {
   let respuesta: Response;
   try {
@@ -93,3 +124,42 @@ export async function obtenerClima(ciudad: Ciudad, unidad: Unidad): Promise<Clim
     unidadTemperatura: datos.current_units?.temperature_2m ?? (unidad === "f" ? "°F" : "°C"),
   };
 }
+<<<<<<< HEAD
+=======
+
+export async function obtenerPronostico(ciudad: Ciudad, unidad: Unidad): Promise<Pronostico> {
+  const params = new URLSearchParams({
+    latitude: String(ciudad.lat),
+    longitude: String(ciudad.lon),
+    daily:
+      "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max",
+    forecast_days: "7",
+    timezone: "auto",
+  });
+  if (unidad === "f") params.set("temperature_unit", "fahrenheit");
+  const url = `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
+  const datos = (await pedirJson(url)) as RespuestaPronostico;
+  const daily = datos.daily;
+  const fechas = daily?.time;
+  const maximos = daily?.temperature_2m_max;
+  const codigos = daily?.weather_code;
+  const minimos = daily?.temperature_2m_min;
+  const lluvias = daily?.precipitation_probability_max;
+  const vientos = daily?.wind_speed_10m_max;
+  if (!Array.isArray(fechas) || !Array.isArray(maximos)) {
+    throw new Error("respuesta inesperada de la API de previsión");
+  }
+  const dias: DiaPronostico[] = fechas.map((fecha, i) => ({
+    fecha,
+    codigoClima: codigos?.[i] ?? 0,
+    tempMax: maximos[i] ?? 0,
+    tempMin: minimos?.[i] ?? 0,
+    probLluvia: lluvias?.[i] ?? 0,
+    vientoMax: vientos?.[i] ?? 0,
+  }));
+  return {
+    dias,
+    unidadTemperatura: datos.daily_units?.temperature_2m_max ?? (unidad === "f" ? "°F" : "°C"),
+  };
+}
+>>>>>>> 02-forecast

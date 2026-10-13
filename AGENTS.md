@@ -2,6 +2,8 @@
 
 App de consola (CLI) pequeña en Bun + TypeScript (clima). Punto de entrada único: `index.ts`. Sin monorepo, sin configuración de build más allá de `tsconfig.json`.
 
+Módulos: `api.ts` (HTTP Open-Meteo), `display.ts` (ficha de clima), `menu.ts` (menú y prompts), `storage.ts` (configuración), `color.ts` (estilos ANSI), `types.ts` (tipos compartidos).
+
 ## Comandos
 
 - Ejecutar: `bun index.ts` (modo watch: `bun --watch index.ts`)
@@ -13,12 +15,14 @@ App de consola (CLI) pequeña en Bun + TypeScript (clima). Punto de entrada úni
 ## Convenciones
 
 - **Toda la salida de la CLI y los textos visibles al usuario están en español.** El `README.md` está en español y define el texto exacto del menú (caja `WEATHER CLI`, opciones como `Clima de ciudad default`, `Ajustes (°C)`). Respeta ese menú en lugar de escribir textos de interfaz en inglés.
-- La persistencia (ciudad por defecto, ciudades guardadas) todavía no está implementada; no existe ningún formato de almacenamiento — elige algo sencillo y mantenlo dentro del repo, sin variables de entorno.
+- La persistencia está implementada en `storage.ts`: JSON en `~/.weather-cli.json` (fuera del repo, vía `homedir()` de `node:os`), con `cargarConfig`/`guardarConfig`. No uses variables de entorno ni ficheros dentro del repo.
 - HTTP: sin API keys, sin `.env`. Flujo de dos pasos según el README: geocoding `https://geocoding-api.open-meteo.com/v1/search?...` → previsión `https://api.open-meteo.com/v1/forecast?...`. Usa el `fetch` nativo de Bun.
 - TypeScript es la **native preview (`^7`)**, no 5.x/6.x; `bunx tsc` está disponible localmente (`node_modules/.bin/tsc`).
+- Colores: ANSI propios en `color.ts`, sin dependencias (`picocolors`/`chalk`). Los helpers (`negrita`, `dim`, `rojo`, `verde`, `amarillo`, `azul`, `cian`, `magenta`, `gris`, `naranja`) devuelven texto plano si no hay color activo; la activación se calcula una vez en `COLOR_HABILITADO`: TTY + sin `NO_COLOR`, o `FORCE_COLOR` (distinto de `"0"`). Existen helpers semánticos `colorTemperatura(valor, unidad)` (umbrales en °C; convierte si la unidad es `°F`) y `colorClima(codigoWMO)`. Colorea menú (`menu.ts`), ficha de clima (`display.ts`) y mensajes de `index.ts` con los helpers locales `error()` (rojo), `exito()` (verde), `aviso()` (amarillo).
 
 ## Advertencias
 
 - `tsconfig.json` activa `strict` **y** `noUncheckedIndexedAccess`: el acceso por índice a arrays/objetos produce `T | undefined`, así que las búsquedas de opciones del menú y los resultados parseados necesitan narrowing.
 - `verbatimModuleSyntax` está activo: usa `import type` para imports solo de tipos.
+- Colores: usa solo códigos legibles sobre fondos oscuros (bright); `azul` es `\x1b[94m`, no `\x1b[34m`. Al envolver texto con color, calcula el padding/longitudes sobre el texto **plano** y aplica el envoltorio ANSI después (ej. `dim(etiqueta.padEnd(14))` en `display.ts`), o las columnas se descuadran.
 - Sin CI, sin hooks de pre-commit, sin historial de `AGENTS.md`/`CLAUDE.md`/`opencode.json` — este fichero es la única fuente de instrucciones.
