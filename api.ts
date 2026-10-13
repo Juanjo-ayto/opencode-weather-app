@@ -37,8 +37,6 @@ interface RespuestaClima {
   };
 }
 
-<<<<<<< HEAD
-=======
 export interface DiaPronostico {
   fecha: string;
   codigoClima: number;
@@ -67,7 +65,6 @@ interface RespuestaPronostico {
   };
 }
 
->>>>>>> 02-forecast
 async function pedirJson(url: string): Promise<unknown> {
   let respuesta: Response;
   try {
@@ -124,8 +121,6 @@ export async function obtenerClima(ciudad: Ciudad, unidad: Unidad): Promise<Clim
     unidadTemperatura: datos.current_units?.temperature_2m ?? (unidad === "f" ? "°F" : "°C"),
   };
 }
-<<<<<<< HEAD
-=======
 
 export async function obtenerPronostico(ciudad: Ciudad, unidad: Unidad): Promise<Pronostico> {
   const params = new URLSearchParams({
@@ -162,4 +157,3 @@ export async function obtenerPronostico(ciudad: Ciudad, unidad: Unidad): Promise
     unidadTemperatura: datos.daily_units?.temperature_2m_max ?? (unidad === "f" ? "°F" : "°C"),
   };
 }
->>>>>>> 02-forecast

@@ -1,11 +1,6 @@
-<<<<<<< HEAD
-import type { ClimaActual } from "./api";
-import type { Ciudad } from "./types";
-=======
 import type { ClimaActual, Pronostico } from "./api";
 import type { Ciudad } from "./types";
 import { azul, cian, colorClima, colorTemperatura, dim, gris, negrita } from "./color";
->>>>>>> 02-forecast
 
 const CODIGOS_WMO: Record<number, string> = {
   0: "Despejado",
@@ -53,26 +48,12 @@ function num(valor: number): string {
 }
 
 function fila(etiqueta: string, valor: string): string {
-<<<<<<< HEAD
-  return `  ${etiqueta.padEnd(14)}${valor}`;
-=======
   return `  ${dim(etiqueta.padEnd(14))}${valor}`;
->>>>>>> 02-forecast
 }
 
 export function pintarClima(ciudad: Ciudad, clima: ClimaActual): void {
   const titulo = etiquetaCiudad(ciudad);
   console.log("");
-<<<<<<< HEAD
-  console.log(`  ${titulo}`);
-  console.log(`  ${"─".repeat(Math.max(titulo.length, 34))}`);
-  console.log(fila("Estado", descripcionClima(clima.codigoClima)));
-  console.log(fila("Temperatura", `${num(clima.temperatura)} ${clima.unidadTemperatura}`));
-  console.log(fila("Sensación", `${num(clima.sensacion)} ${clima.unidadTemperatura}`));
-  console.log(fila("Humedad", `${num(clima.humedad)} %`));
-  console.log(fila("Viento", `${num(clima.viento)} km/h`));
-  console.log(fila("Hora local", clima.hora));
-=======
   console.log(`  ${negrita(cian(titulo))}`);
   console.log(`  ${dim("─".repeat(Math.max(titulo.length, 34)))}`);
   console.log(
@@ -145,5 +126,4 @@ export function pintarPronostico(ciudad: Ciudad, pronostico: Pronostico): void {
       azul(`${num(dia.vientoMax)} km/h`.padStart(11));
     console.log(`  ${filaTexto}`);
   }
->>>>>>> 02-forecast
 }
